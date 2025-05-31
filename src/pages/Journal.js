@@ -7,6 +7,7 @@ import '../styles/CustomCalendar.css'; // Import your custom CSS for the hover e
 import axios from 'axios';
 import { UserContext } from '../context/UserContext.js';
 import '../styles/CustomCalendar.css';
+import {BACKEND_URL} from "../config/constants";
 
 
 const JournalPage = () => {
@@ -22,7 +23,7 @@ const JournalPage = () => {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [journalId, setJournalId] = useState(null);
 
-    const backurl = "http://18.175.157.162:5000";
+    const backurl = BACKEND_URL;
     const { userId } = useContext(UserContext);
 
     const handleOpenModal = async (date) => {

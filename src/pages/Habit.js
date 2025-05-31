@@ -14,6 +14,7 @@ import {
     InputGroup,
 } from 'react-bootstrap';
 import { BsChevronDown } from 'react-icons/bs';
+import {BACKEND_URL} from "../config/constants";
 
 const Habit = ({ userId }) => {
     const [habits, setHabits] = useState([]);
@@ -23,7 +24,7 @@ const Habit = ({ userId }) => {
     const [selectedMonth, setSelectedMonth] = useState(moment().month());
     const [selectedYear, setSelectedYear] = useState(moment().year());
     const [showToast, setShowToast] = useState(false);
-    const backurl = 'http://18.175.157.162:5000/';
+    const backurl = BACKEND_URL;
 
     // Fetch habits from the backend
     const fetchHabits = async () => {

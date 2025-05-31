@@ -4,6 +4,7 @@ import axios from 'axios';
 import JournalEntry from '../components/JournalEntry.js';
 
 import { Container, Row, Col } from 'react-bootstrap';
+import {BACKEND_URL} from "../config/constants";
 
 //removed userId prop in JournalEntries
 const JournalEntries = ({  }) => {
@@ -13,7 +14,7 @@ const JournalEntries = ({  }) => {
 
     console.log('inside JournalEntries Page');
     const { userId } = useContext(UserContext);
-   const backurl = "http://localhost:5000/api/simplejournalpages/user/" + userId;
+   const backurl = BACKEND_URL+"/api/simplejournalpages/user/" + userId;
 
     // Define fetchEntries function outside useEffect
     const fetchEntries = async () => {
