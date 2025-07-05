@@ -17,7 +17,7 @@ import Habit from './pages/Habit';
 import Dashboard from './pages/Dashboard';
 
 import { UserContext } from './context/UserContext';
-import { AUTH0_DOMAIN, AUTH0_CLIENT_ID, BACKEND_URL } from './config/constants';
+import { AUTH0_DOMAIN, AUTH0_CLIENT_ID, BACKEND_URL, AUTH0_AUDIENCE } from './config/constants';
 
 const AppContent = () => {
     const { handleRedirectCallback, isLoading, user, isAuthenticated, getAccessTokenSilently } = useAuth0();
@@ -79,14 +79,16 @@ const AppContent = () => {
 };
 
 const App = () => (
-    <Auth0Provider
-        domain={AUTH0_DOMAIN}
-        clientId={AUTH0_CLIENT_ID}
-        redirectUri={window.location.origin}
-        audience="https://dev-8cb3f0uzw42y7hg8.uk.auth0.com/api/v2/"
-    >
-        <AppContent />
-    </Auth0Provider>
+
+        <Auth0Provider
+            domain={AUTH0_DOMAIN}
+            clientId={AUTH0_CLIENT_ID}
+            authorizationParams={{
+                redirect_uri: window.location.origin,
+                audience: AUTH0_AUDIENCE
+            }}
+        />
+
 );
 
 export default App;
