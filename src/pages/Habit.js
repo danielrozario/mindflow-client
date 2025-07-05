@@ -38,7 +38,10 @@ const Habit = ({ userId }) => {
     const fetchHabits = async () => {
         if (!isAuthenticated) return;
         try {
-            const token = await getAccessTokenSilently();
+            const token = await getAccessTokenSilently({
+                audience: 'https://mindflow-api'
+            });
+
             const response = await axios.get(`${backurl}/api/habits`, {
                 headers: {
                     Authorization: `Bearer ${token}`

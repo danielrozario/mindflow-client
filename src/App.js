@@ -102,7 +102,7 @@ const App = () => (
         clientId={AUTH0_CLIENT_ID}
         authorizationParams={{
             redirect_uri: window.location.origin,
-            audience: AUTH0_AUDIENCE
+            audience:"https://mindflow-api"
         }}
     >
         <AppContent />
