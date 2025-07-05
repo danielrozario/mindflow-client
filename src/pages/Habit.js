@@ -29,7 +29,7 @@ const Habit = ({ userId }) => {
     // Fetch habits from the backend
     const fetchHabits = async () => {
         try {
-            const response = await axios.get(`${backurl}/api/habits/${userId}`);
+            const response = await axios.get(`${backurl}/api/habits/`);
             setHabits(response.data);
         } catch (error) {
             console.error('Failed to fetch habits', error);
