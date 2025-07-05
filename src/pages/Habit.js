@@ -181,7 +181,8 @@ const Habit = ({ userId }) => {
                             </InputGroup.Text>
                         </InputGroup>
                     </Form>
-                    <Table bordered responsive style={{ tableLayout: 'fixed' }}> {/* Use fixed table layout */}
+                    {/* Use fixed table layout */}
+                    <Table bordered responsive style={{ tableLayout: 'fixed' }}>
                         <thead>
                         <tr>
                             <th style={{ width: '120px', whiteSpace: 'normal', textAlign: 'center', fontSize: '0.9em' }}>Habits</th>
@@ -190,7 +191,7 @@ const Habit = ({ userId }) => {
                             ))}
                         </tr>
                         <tr>
-                            <th></th>
+                            <th/>
                             {dates.map((date, index) => (
                                 <th key={index}>{date.format('D')}</th>
                             ))}
