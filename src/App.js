@@ -23,10 +23,14 @@ const AppContent = () => {
     const { handleRedirectCallback, isLoading, user, isAuthenticated, getAccessTokenSilently } = useAuth0();
     const [userId, setUserId] = useState(null);
 
+
+
     useEffect(() => {
         const fetchUserId = async () => {
             if (isAuthenticated && user) {
                 try {
+                    console.log("isAuthenticated:", isAuthenticated);
+                    console.log("User:", user);
                     const token = await getAccessTokenSilently();
                     const res = await axios.get(`${BACKEND_URL}/api/users?email=${user.email}`, {
                         headers: {
@@ -43,18 +47,32 @@ const AppContent = () => {
         fetchUserId();
     }, [isAuthenticated, user, getAccessTokenSilently]);
 
-    useEffect(() => {
-        const handleAuthCallback = async () => {
-            if (window.location.search.includes('code=') && window.location.search.includes('state=')) {
-                try {
-                    await handleRedirectCallback();
-                } catch (err) {
-                    console.error('Auth callback error:', err);
-                }
-            }
-        };
-        handleAuthCallback();
-    }, [handleRedirectCallback]);
+    // useEffect(() => {
+    //     const handleAuthCallback = async () => {
+    //         if (window.location.search.includes('code=') && window.location.search.includes('state=')) {
+    //             try {
+    //                 await handleRedirectCallback();
+    //             } catch (err) {
+    //                 console.error('Auth callback error:', err);
+    //             }
+    //         }
+    //     };
+    //     handleAuthCallback();
+    // }, [handleRedirectCallback]);
+
+    if (isLoading) {
+        return (
+            <div style={{
+                height: '100vh',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1.5rem'
+            }}>
+                Loading...
+            </div>
+        );
+    }
 
     return (
         <UserContext.Provider value={{ userId }}>
@@ -79,16 +97,16 @@ const AppContent = () => {
 };
 
 const App = () => (
-
-        <Auth0Provider
-            domain={AUTH0_DOMAIN}
-            clientId={AUTH0_CLIENT_ID}
-            authorizationParams={{
-                redirect_uri: window.location.origin,
-                audience: AUTH0_AUDIENCE
-            }}
-        />
-
+    <Auth0Provider
+        domain={AUTH0_DOMAIN}
+        clientId={AUTH0_CLIENT_ID}
+        authorizationParams={{
+            redirect_uri: window.location.origin,
+            audience: AUTH0_AUDIENCE
+        }}
+    >
+        <AppContent />
+    </Auth0Provider>
 );
 
 export default App;

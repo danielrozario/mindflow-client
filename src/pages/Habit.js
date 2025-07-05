@@ -1,3 +1,5 @@
+import { useAuth0 } from '@auth0/auth0-react';
+import {BACKEND_URL} from "../config/constants";
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import moment from 'moment';
@@ -13,10 +15,13 @@ import {
     ToastContainer,
     InputGroup,
 } from 'react-bootstrap';
+
+
 import { BsChevronDown } from 'react-icons/bs';
-import {BACKEND_URL} from "../config/constants";
 
 const Habit = ({ userId }) => {
+
+    const { getAccessTokenSilently, isAuthenticated } = useAuth0();
     const [habits, setHabits] = useState([]);
     const [dates, setDates] = useState([]);
     const [showModal, setShowModal] = useState(false);
@@ -26,16 +31,26 @@ const Habit = ({ userId }) => {
     const [showToast, setShowToast] = useState(false);
     const backurl = BACKEND_URL;
 
+
+
+
     // Fetch habits from the backend
     const fetchHabits = async () => {
+        if (!isAuthenticated) return;
         try {
-            const response = await axios.get(`${backurl}/api/habits/`);
+            const token = await getAccessTokenSilently();
+            const response = await axios.get(`${backurl}/api/habits`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
             setHabits(response.data);
         } catch (error) {
             console.error('Failed to fetch habits', error);
             alert('Failed to fetch habits. Please try again later.');
         }
     };
+
 
     // Create a new habit
     const createHabit = async () => {
@@ -44,14 +59,20 @@ const Habit = ({ userId }) => {
             return;
         }
         try {
-            const response = await axios.post(`${backurl}/api/habits`, { ...newHabit, userId });
+            const token = await getAccessTokenSilently();
+            const response = await axios.post(`${backurl}/api/habits`, newHabit, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
             setHabits([...habits, response.data]);
-            handleCloseModal(); // Close the modal and reset the form after creating the habit
+            handleCloseModal();
         } catch (error) {
             console.error('Failed to create habit', error);
             alert('Failed to create habit. Please try again later.');
         }
     };
+
 
     // Close the modal and reset the form
     const handleCloseModal = () => {
@@ -82,28 +103,26 @@ const Habit = ({ userId }) => {
 
     // Handle toggling the habit checkbox
     const handleToggleHabit = async (habitId, date) => {
-        const formattedDate = date.toDate(); // Convert moment.js date to JavaScript Date object
+        const formattedDate = date.toDate();
         const habit = habits.find((h) => h._id === habitId);
         const isTracked = habit.trackedDays.some((d) => new Date(d.date).getTime() === formattedDate.getTime());
 
-        let updatedTrackedDays;
-
-        if (isTracked) {
-            // If the date is already tracked, remove it (toggle off)
-            updatedTrackedDays = habit.trackedDays.filter((d) => new Date(d.date).getTime() !== formattedDate.getTime());
-        } else {
-            // If the date is not tracked, add it (toggle on)
-            updatedTrackedDays = [...habit.trackedDays, { date: formattedDate }];
-        }
+        const updatedTrackedDays = isTracked
+            ? habit.trackedDays.filter((d) => new Date(d.date).getTime() !== formattedDate.getTime())
+            : [...habit.trackedDays, { date: formattedDate }];
 
         try {
+            const token = await getAccessTokenSilently();
             const response = await axios.put(`${backurl}/api/habits/${habitId}/trackedDays`, {
-                trackedDays: updatedTrackedDays,
+                trackedDays: updatedTrackedDays
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
             });
 
-            // Update the habit in the state with the updated trackedDays from the server response
             setHabits(habits.map((h) => (h._id === habitId ? { ...h, trackedDays: response.data.trackedDays } : h)));
-            setShowToast(true); // Show toast on habit update
+            setShowToast(true);
         } catch (error) {
             console.error('Failed to update habit', error.response || error.message);
             alert(`Failed to update habit: ${error.response?.data?.message || error.message}`);
