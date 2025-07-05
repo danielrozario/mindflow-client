@@ -83,6 +83,7 @@ const App = () => (
         domain={AUTH0_DOMAIN}
         clientId={AUTH0_CLIENT_ID}
         redirectUri={window.location.origin}
+        audience="https://your-backend-api"
     >
         <AppContent />
     </Auth0Provider>

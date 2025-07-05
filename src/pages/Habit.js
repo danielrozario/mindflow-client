@@ -29,7 +29,7 @@ const Habit = ({ userId }) => {
     // Fetch habits from the backend
     const fetchHabits = async () => {
         try {
-            const response = await axios.get(`${backurl}api/habits/${userId}`);
+            const response = await axios.get(`${backurl}/api/habits/${userId}`);
             setHabits(response.data);
         } catch (error) {
             console.error('Failed to fetch habits', error);
@@ -44,7 +44,7 @@ const Habit = ({ userId }) => {
             return;
         }
         try {
-            const response = await axios.post(`${backurl}api/habits`, { ...newHabit, userId });
+            const response = await axios.post(`${backurl}/api/habits`, { ...newHabit, userId });
             setHabits([...habits, response.data]);
             handleCloseModal(); // Close the modal and reset the form after creating the habit
         } catch (error) {
@@ -97,7 +97,7 @@ const Habit = ({ userId }) => {
         }
 
         try {
-            const response = await axios.put(`${backurl}api/habits/${habitId}/trackedDays`, {
+            const response = await axios.put(`${backurl}/api/habits/${habitId}/trackedDays`, {
                 trackedDays: updatedTrackedDays,
             });
 
