@@ -1,14 +1,12 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import Calendar from 'react-calendar';
 import JournalPageModal from '../components/JournalPageModal';
 import { Container, Toast, ToastContainer } from 'react-bootstrap';
 import 'react-calendar/dist/Calendar.css';
-import '../styles/CustomCalendar.css'; // Import your custom CSS for the hover effect
-import axios from 'axios';
-import { UserContext } from '../context/UserContext.js';
 import '../styles/CustomCalendar.css';
-import {BACKEND_URL} from "../config/constants";
-
+import axios from 'axios';
+import { BACKEND_URL } from '../config/constants';
+import { useAuth0 } from '@auth0/auth0-react';
 
 const JournalPage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -23,19 +21,21 @@ const JournalPage = () => {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [journalId, setJournalId] = useState(null);
 
-    const backurl = BACKEND_URL;
-    const { userId } = useContext(UserContext);
+    const { getAccessTokenSilently } = useAuth0();
 
     const handleOpenModal = async (date) => {
-        // Normalize the date to the start of the day in UTC
         const normalizedDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-        setSelectedDate(normalizedDate); // Set the normalized date
+        setSelectedDate(normalizedDate);
 
         try {
-            const response = await axios.get(`${backurl}/api/journalPages?date=${normalizedDate.toISOString()}&user=${userId}`);
-            console.log('API response data:', response.data);
+            const token = await getAccessTokenSilently();
+            console.log('token is: '    , token);
+            const response = await axios.get(`${BACKEND_URL}/api/journalPages`, {
+                params: { date: normalizedDate.toISOString() },
+                headers: { Authorization: `Bearer ${token}` }
+            });
 
-            if (response.data && response.data.length > 0) {
+            if (response.data.length > 0) {
                 setJournalData(response.data[0]);
                 setJournalId(response.data[0]._id);
             } else {
@@ -49,7 +49,6 @@ const JournalPage = () => {
                 setJournalId(null);
             }
 
-            console.log('Data sent to modal:', journalData);
             setIsModalOpen(true);
         } catch (error) {
             console.error('Error fetching journal entry:', error);
@@ -61,16 +60,23 @@ const JournalPage = () => {
 
     const handleSave = async (data) => {
         try {
+            const token = await getAccessTokenSilently();
             if (journalId) {
-                await axios.put(`${backurl}/api/journalPages/${journalId}`, { ...data, user: userId });
-                console.log('Journal entry updated:', data);
+                await axios.put(`${BACKEND_URL}/api/journalPages/${journalId}`, data, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
             } else {
-                await axios.post(`${backurl}/api/journalPages`, { ...data, date: selectedDate.toISOString(), user: userId });
-                console.log('Journal entry created:', data);
+                await axios.post(`${BACKEND_URL}/api/journalPages`, {
+                    ...data,
+                    date: selectedDate.toISOString()
+                }, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
             }
+
             setJournalData(data);
             handleCloseModal();
-            setShowToast(true); // Show toast after saving
+            setShowToast(true);
         } catch (error) {
             console.error('Error saving journal entry:', error);
             alert('Failed to save journal entry. Please try again.');
@@ -89,7 +95,7 @@ const JournalPage = () => {
                 onClose={handleCloseModal}
                 onSave={handleSave}
                 initialData={journalData}
-                selectedDate={selectedDate} // Pass the selected date to the modal
+                selectedDate={selectedDate}
             />
             <ToastContainer position="top-center">
                 <Toast show={showToast} onClose={() => setShowToast(false)} delay={3000} autohide>

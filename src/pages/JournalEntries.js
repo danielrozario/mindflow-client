@@ -1,29 +1,29 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { UserContext } from '../context/UserContext';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import JournalEntry from '../components/JournalEntry.js';
-
+import JournalEntry from '../components/JournalEntry';
 import { Container, Row, Col } from 'react-bootstrap';
-import {BACKEND_URL} from "../config/constants";
+import { BACKEND_URL } from "../config/constants";
+import { useAuth0 } from '@auth0/auth0-react';
 
-//removed userId prop in JournalEntries
-const JournalEntries = ({  }) => {
+const JournalEntries = () => {
     const [entries, setEntries] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    console.log('inside JournalEntries Page');
-    const { userId } = useContext(UserContext);
-   const backurl = BACKEND_URL+"/api/simplejournalpages/user/" + userId;
+    const { getAccessTokenSilently } = useAuth0();
 
-    // Define fetchEntries function outside useEffect
     const fetchEntries = async () => {
         try {
-            const response = await axios.get(backurl);
+            const token = await getAccessTokenSilently();
+            const response = await axios.get(`${BACKEND_URL}/api/simplejournalpages`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
             setEntries(response.data);
-            console.log(`returned data: ${entries}`);
-        } catch (error) {
-            setError(error);
+        } catch (err) {
+            setError(err);
+            console.error("Error fetching entries:", err);
         } finally {
             setLoading(false);
         }
@@ -31,20 +31,21 @@ const JournalEntries = ({  }) => {
 
     useEffect(() => {
         fetchEntries();
-    }, [userId]); // Run fetchEntries only when userId changes
+    }, []);
 
-    // Define handleUpdate function
     const handleUpdate = () => {
-        // Trigger a re-fetch of journal entries
-        fetchEntries();
+        fetchEntries(); // Re-fetch when an entry is updated
     };
+
+    if (loading) return <p>Loading...</p>;
+    if (error) return <p>Failed to load entries.</p>;
 
     return (
         <Container>
             <Row xs={1} md={2} lg={3} className="g-4">
                 {entries.map((entry) => (
                     <Col key={entry._id}>
-                        <JournalEntry key={entry._id} entry={entry} onUpdate={handleUpdate} />
+                        <JournalEntry entry={entry} onUpdate={handleUpdate} />
                     </Col>
                 ))}
             </Row>

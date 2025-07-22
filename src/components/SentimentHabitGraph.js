@@ -13,7 +13,7 @@ const SentimentHabitGraphs = ({ userId, startDate, endDate }) => {
 
     useEffect(() => {
         // Fetch data from the correlation API
-        axios.get('http://localhost:5000/api/correlation', {
+        axios.get('https://mindflow-server-21qb.onrender.com/api/correlation', {
             params: {
                 user: userId,
                 startDate: startDate,
